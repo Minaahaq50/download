@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>المدرسون - منصة THE BEST</title>
+<style>
+  body { font-family: 'Cairo', sans-serif; background:#0d0d0d; color:#fff; padding:20px; }
+  h1 { color:#ffd700; text-align:center; }
+  ul { list-style:none; padding:0; max-width:400px; margin:20px auto; }
+  li { background:#1a1a1a; margin:10px 0; padding:15px; border-radius:10px; cursor:pointer; text-align:center; font-weight:bold; color:#ffd700; transition: background 0.3s; }
+  li:hover { background:#333; }
+  #back { color:#ffd700; cursor:pointer; text-align:center; margin-bottom:20px; display:block; max-width:400px; margin-left:auto; margin-right:auto; }
+</style>
+</head>
+<body>
+  <h1>المدرسون</h1>
+  <div id="back">⬅ العودة إلى المواد</div>
+  <ul id="teachers-list">
+    <li>جارٍ التحميل...</li>
+  </ul>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCdhj73cKJc2J2_tDHw2-89EemZx-EGMJQ",
+      authDomain: "alamer-526ff.firebaseapp.com",
+      databaseURL: "https://alamer-526ff-default-rtdb.firebaseio.com",
+      projectId: "alamer-526ff",
+      storageBucket: "alamer-526ff.firebasestorage.app",
+      messagingSenderId: "523879269039",
+      appId: "1:523879269039:web:634861aa34641bfebf8a5a",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const subject = urlParams.get('subject');
+
+    const teachersList = document.getElementById('teachers-list');
+    const backBtn = document.getElementById('back');
+
+    backBtn.onclick = () => {
+      window.location.href = 'subjects.html';
+    };
+
+    if(!subject){
+      teachersList.innerHTML = '<li>لم يتم تحديد المادة.</li>';
+    } else {
+      onValue(ref(db, 'videos'), snapshot => {
+        const data = snapshot.val() || {};
+        const teachers = new Set();
+        Object.values(data).forEach(v => {
+          if(v.subject === subject && v.teacher) teachers.add(v.teacher);
+        });
+        teachersList.innerHTML = '';
+        if(teachers.size === 0){
+          teachersList.innerHTML = '<li>لا يوجد مدرسون لهذه المادة.</li>';
+          return;
+        }
+        teachers.forEach(teacher => {
+          const li = document.createElement('li');
+          li.textContent = teacher;
+          li.onclick = () => {
+            // الانتقال لصفحة الفيديوهات مع تمرير المادة والمدرس
+            window.location.href = `videos.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
+          };
+          teachersList.appendChild(li);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
