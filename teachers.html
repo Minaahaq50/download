@@ -66,7 +66,7 @@
           li.textContent = teacher;
           li.onclick = () => {
             // الانتقال لصفحة الفيديوهات مع تمرير المادة والمدرس
-            window.location.href = `videos.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
+            window.location.href = `chapters.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
           };
           teachersList.appendChild(li);
         });
