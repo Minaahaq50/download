@@ -7,12 +7,13 @@
 <style>
   body { font-family: 'Cairo', sans-serif; background:#0d0d0d; color:#fff; padding:20px; }
   h1 { color:#ffd700; text-align:center; margin-bottom: 10px; }
-  #back { color:#ffd700; cursor:pointer; text-align:center; margin-bottom:20px; max-width:400px; margin-left:auto; margin-right:auto; }
+  #back { color:#ffd700; cursor:pointer; text-align:center; margin-bottom:20px; }
   #videos-container {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;
   }
   .video-box {
-    background:#1a1a1a; padding:10px; border-radius:12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+    background:#1a1a1a; padding:10px; border-radius:12px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
     transition: transform 0.2s ease-in-out, box-shadow 0.2s;
   }
   .video-box:hover { transform: translateY(-5px); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
@@ -20,14 +21,10 @@
   .video-teacher { text-align: center; font-size: 14px; margin-bottom: 10px; color: #bbb; }
   .thumb { position:relative; cursor:pointer; border-radius:10px; overflow:hidden; background:#000; height:200px; display:flex; align-items:center; justify-content:center; }
   .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
-  .thumb .play-btn { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:50px; color:#ffd700; text-shadow:0 0 10px rgba(0,0,0,.9); user-select:none; }
+  .thumb .play-btn { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:50px; color:#ffd700; text-shadow:0 0 10px rgba(0,0,0,.9); }
   #videoModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; padding:20px; }
   #videoModal .modal-wrap { width:100%; max-width:980px; background:#000; border-radius:12px; overflow:hidden; }
-  #videoModal iframe { width:100%; height:560px; border:0; display:block; background:#000; }
-  #videoModal .modal-controls { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#111; color:#ffd700; font-weight:bold; }
-  #videoModal .modal-controls button { background:none; border:1px solid #333; padding:8px 12px; border-radius:8px; cursor:pointer; color:#ffd700; }
-  #videoModal .modal-controls button:hover { background:#222; color:#fff; }
-  .video-rotated { transform: rotate(90deg); transform-origin: center center; width: 100vh !important; height: 100vw !important; transition: all 0.5s ease; }
+  #videoModal iframe { width:100%; height:560px; border:0; display:block; }
 </style>
 </head>
 <body>
@@ -40,16 +37,6 @@
   <div id="videoModal" aria-hidden="true">
     <div class="modal-wrap">
       <iframe id="videoFrame" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
-      <div class="modal-controls">
-        <div>
-          <button id="prevVideo">⏮ السابق</button>
-          <button id="nextVideo">⏭ التالي</button>
-        </div>
-        <div>
-          <button id="fullscreenBtn">⛶ تكبير/تدوير</button>
-          <button id="closeModal" style="color:#ff6b6b;">✖ إغلاق</button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -73,6 +60,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const subject = urlParams.get('subject');
     const teacher = urlParams.get('teacher');
+    const chapter = urlParams.get('chapter'); // الباب (باب أول، تاني، معسكرات...)
 
     const videosContainer = document.getElementById('videos-container');
     const backBtn = document.getElementById('back');
@@ -87,7 +75,6 @@
 
     let currentVideos = [];
     let currentIndex = 0;
-    let rotated = false;
 
     function isYouTubeUrl(url) {
       return /youtu\.be|youtube\.com/.test(url);
@@ -99,22 +86,25 @@
         if(u.searchParams.get('v')) return u.searchParams.get('v');
         const m = u.pathname.match(/\/embed\/([^/?#]+)/);
         return m ? m[1] : '';
-      } catch {
-        return '';
-      }
+      } catch { return ''; }
     }
 
     onValue(ref(db, 'videos'), snapshot => {
       const data = snapshot.val() || {};
-      if(!subject || !teacher){
-        videosContainer.innerHTML = '<div style="text-align:center; font-size:18px; color:#ffd700;">لم يتم تحديد المادة أو المدرس.</div>';
+      if(!subject || !teacher || !chapter){
+        videosContainer.innerHTML = '<div style="text-align:center; font-size:18px; color:#ffd700;">لم يتم تحديد المادة أو المدرس أو الباب.</div>';
         return;
       }
-      currentVideos = Object.values(data).filter(v => v.subject === subject && v.teacher === teacher);
+
+      currentVideos = Object.values(data).filter(v => 
+        v.subject === subject && v.teacher === teacher && v.chapter === chapter
+      );
+
       if(currentVideos.length === 0){
-        videosContainer.innerHTML = '<div style="text-align:center; font-size:18px; color:#ffd700;">لا توجد فيديوهات.</div>';
+        videosContainer.innerHTML = '<div style="text-align:center; font-size:18px; color:#ffd700;">لا توجد فيديوهات في هذا الباب.</div>';
         return;
       }
+
       videosContainer.innerHTML = '';
       currentVideos.forEach((video, idx) => {
         const box = document.createElement('div');
@@ -125,74 +115,20 @@
 
         box.innerHTML = `
           <div class="video-title">${video.title}</div>
-          <div class="video-teacher">المدرس: ${video.teacher} | ${video.chapter || 'غير محدد'}</div>
+          <div class="video-teacher">المدرس: ${video.teacher} | ${video.chapter}</div>
           ${youtube ? `<div class="thumb" data-idx="${idx}"><img src="${thumb}"><div class="play-btn">▶</div></div>` :
-          `<video controls poster="${thumb}" style="width:100%; height:250px; border-radius:10px;"><source src="${video.url}" type="video/mp4">متصفحك لا يدعم تشغيل الفيديو.</video>`}
+          `<video controls poster="${thumb}" style="width:100%; height:250px; border-radius:10px;"><source src="${video.url}" type="video/mp4"></video>`}
         `;
 
         if(youtube){
           box.querySelector('.thumb').addEventListener('click', () => {
-            currentIndex = idx;
-            openVideo(currentIndex);
+            document.getElementById('videoFrame').src = `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`;
+            document.getElementById('videoModal').style.display = 'flex';
           });
         }
+
         videosContainer.appendChild(box);
       });
-    });
-
-    const videoModal = document.getElementById('videoModal');
-    const videoFrame = document.getElementById('videoFrame');
-    const closeModalBtn = document.getElementById('closeModal');
-    const nextBtn = document.getElementById('nextVideo');
-    const prevBtn = document.getElementById('prevVideo');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-
-    function openVideo(index){
-      currentIndex = index;
-      const video = currentVideos[currentIndex];
-      if(!video) return;
-      if(isYouTubeUrl(video.url)){
-        const id = getYouTubeId(video.url);
-        videoFrame.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
-      } else {
-        videoFrame.src = video.url;
-      }
-      videoModal.style.display = 'flex';
-      videoModal.setAttribute('aria-hidden', 'false');
-    }
-    function closeVideo(){
-      videoModal.style.display = 'none';
-      videoModal.setAttribute('aria-hidden', 'true');
-      videoFrame.src = '';
-    }
-    closeModalBtn.addEventListener('click', closeVideo);
-    nextBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % currentVideos.length;
-      openVideo(currentIndex);
-    });
-    prevBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex - 1 + currentVideos.length) % currentVideos.length;
-      openVideo(currentIndex);
-    });
-    fullscreenBtn.addEventListener('click', () => {
-      const wrap = document.querySelector('#videoModal .modal-wrap');
-      if(!wrap) return;
-      if(!rotated){
-        wrap.classList.add("video-rotated");
-        rotated = true;
-      } else {
-        wrap.classList.remove("video-rotated");
-        rotated = false;
-      }
-      if(wrap.requestFullscreen) wrap.requestFullscreen();
-      else if(wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
-      else if(wrap.msRequestFullscreen) wrap.msRequestFullscreen();
-    });
-    document.addEventListener('keydown', e => {
-      if(e.key === 'Escape' && videoModal.style.display === 'flex') closeVideo();
-    });
-    videoModal.addEventListener('click', e => {
-      if(e.target === videoModal) closeVideo();
     });
   </script>
 </body>
