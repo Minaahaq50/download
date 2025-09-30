@@ -7,10 +7,66 @@
 <style>
   body { font-family: 'Cairo', sans-serif; background:#0d0d0d; color:#fff; padding:20px; }
   h1 { color:#ffd700; text-align:center; }
+
   ul { list-style:none; padding:0; max-width:400px; margin:20px auto; }
-  li { background:#1a1a1a; margin:10px 0; padding:15px; border-radius:10px; cursor:pointer; text-align:center; font-weight:bold; color:#ffd700; transition: background 0.3s; }
-  li:hover { background:#333; }
-  #back { color:#ffd700; cursor:pointer; text-align:center; margin-bottom:20px; display:block; max-width:400px; margin-left:auto; margin-right:auto; }
+
+  li {
+    background:#1a1a1a;
+    margin:15px 0;
+    padding:20px 15px;
+    border-radius:12px;
+    cursor:pointer;
+    text-align:center;
+    font-weight:bold;
+    color:#ffd700;
+    transition: background 0.3s, transform 0.3s;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  li:hover {
+    background:#333;
+    transform: translateY(-5px);
+  }
+
+  /* دائرة صورة المدرس */
+  .circle {
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#222;
+    border:3px solid #ffd700;
+    overflow:hidden;
+    margin-bottom:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .circle img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+  }
+
+  /* اسم المدرس */
+  li span {
+    font-size:1.1rem;
+  }
+
+  #back {
+    color:#ffd700;
+    cursor:pointer;
+    text-align:center;
+    margin-bottom:20px;
+    display:block;
+    max-width:400px;
+    margin-left:auto;
+    margin-right:auto;
+    font-weight:bold;
+  }
 </style>
 </head>
 <body>
@@ -52,22 +108,44 @@
     } else {
       onValue(ref(db, 'videos'), snapshot => {
         const data = snapshot.val() || {};
-        const teachers = new Set();
+        const teachers = new Map();
+
+        // اجمع كل المدرسين مع صورهم
         Object.values(data).forEach(v => {
-          if(v.subject === subject && v.teacher) teachers.add(v.teacher);
+          if(v.subject === subject && v.teacher){
+            teachers.set(v.teacher, v.teacherImage || null);
+          }
         });
+
         teachersList.innerHTML = '';
         if(teachers.size === 0){
           teachersList.innerHTML = '<li>لا يوجد مدرسون لهذه المادة.</li>';
           return;
         }
-        teachers.forEach(teacher => {
+
+        teachers.forEach((imgUrl, teacher) => {
           const li = document.createElement('li');
-          li.textContent = teacher;
+
+          // دائرة الصورة
+          const circle = document.createElement('div');
+          circle.className = 'circle';
+
+          const img = document.createElement('img');
+          img.src = imgUrl || "https://img.icons8.com/ios-filled/100/ffd700/user-male-circle.png";
+          img.alt = teacher;
+          circle.appendChild(img);
+
+          // اسم المدرس
+          const span = document.createElement('span');
+          span.textContent = teacher;
+
+          li.appendChild(circle);
+          li.appendChild(span);
+
           li.onclick = () => {
-            // الانتقال لصفحة الفيديوهات مع تمرير المادة والمدرس
             window.location.href = `chapters.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
           };
+
           teachersList.appendChild(li);
         });
       });
