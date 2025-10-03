@@ -39,7 +39,7 @@
     background:#000; 
     border-radius:12px; 
     overflow:hidden; 
-    position:relative; /* مهم عشان الزر يتثبت */
+    position:relative; /* عشان الزر يبقى فوق الـ iframe */
   }
   #videoModal iframe { 
     width:100%; 
@@ -47,7 +47,7 @@
     border:0; 
     display:block; 
     position:relative; 
-    z-index:1; 
+    z-index:1; /* أقل من زر الإغلاق */
   }
 
   /* زر الإغلاق */
@@ -55,7 +55,7 @@
     position: absolute;
     top: 20px;
     left: 20px;
-    z-index: 9999;
+    z-index: 9999; /* فوق الـ iframe */
     width: 50px;
     height: 50px;
     border-radius: 50%;
