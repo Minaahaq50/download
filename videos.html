@@ -39,7 +39,7 @@
     background:#000; 
     border-radius:12px; 
     overflow:hidden; 
-    position:relative; 
+    position:relative; /* مهم عشان الزر يتثبت */
   }
   #videoModal iframe { 
     width:100%; 
@@ -50,7 +50,7 @@
     z-index:1; 
   }
 
-  /* زر الإغلاق الاحترافي */
+  /* زر الإغلاق */
   #closeBtn {
     position: absolute;
     top: 20px;
@@ -157,7 +157,7 @@
       videoFrame.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`;
       videoModal.style.display = 'flex';
 
-      // دخول fullscreen تلقائي
+      // دخول fullscreen للمودال كله مش للـ iframe
       if (!document.fullscreenElement) {
         videoModal.requestFullscreen().catch(()=>{});
       }
