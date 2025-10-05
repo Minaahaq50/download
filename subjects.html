@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>المواد - منصة THE BEST</title>
+<title>المواد - مدرسة كنيسة الأمير تادرس</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
 
@@ -11,10 +11,76 @@
     font-family: 'Cairo', sans-serif;
     background: #121212;
     color: #fff;
-    padding: 30px 15px;
+    padding: 80px 15px 30px;
     margin: 0;
+    transition: background 0.3s, color 0.3s;
   }
 
+  /* ===== الشريط العلوي ===== */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #111;
+    padding: 10px 15px;
+    color: white;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1000;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .menu-btn {
+    font-size: 22px;
+    cursor: pointer;
+  }
+
+  .title {
+    font-size: 14px;
+    color: #f36;
+  }
+
+  .icons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .icons img {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+  }
+
+  .toggle-dark {
+    background: #fff;
+    border-radius: 12px;
+    width: 40px;
+    height: 20px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .toggle-dark::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: #111;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+
+  .toggle-dark.active::after {
+    left: 22px;
+    background: #ff0;
+  }
+
+  /* ===== باقي التنسيقات ===== */
   h1 {
     color: #ffd700;
     text-align: center;
@@ -29,14 +95,14 @@
     max-width: 900px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(2, 1fr); /* نظام مربعات 2x2 لأربع مواد كبيرة */
+    gap: 40px; /* زيادة المسافة لجعلها أكبر */
   }
 
   li {
     background: #1e1e1e;
     border-radius: 16px;
-    padding: 20px 15px 30px;
+    padding: 30px 20px 40px; /* زيادة الحشوة لجعل الكروت أكبر */
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(255, 215, 0, 0.15);
     transition: background-color 0.3s ease, transform 0.25s ease, box-shadow 0.3s ease;
@@ -58,14 +124,13 @@
     box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
   }
 
-  /* الدائرة التي تحتوي الصورة */
   .circle {
-    width: 100px;
-    height: 100px;
+    width: 140px; /* زيادة الحجم لجعل الكروت كبيرة */
+    height: 140px;
     border-radius: 50%;
     background: #333;
     overflow: hidden;
-    margin-bottom: 18px;
+    margin-bottom: 25px; /* زيادة المسافة السفلية */
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
     display: flex;
     justify-content: center;
@@ -78,14 +143,12 @@
     object-fit: contain;
   }
 
-  /* اسم المادة */
   li span {
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 1.4rem; /* زيادة حجم النص */
     text-align: center;
   }
 
-  /* رسالة التحميل أو لا توجد مواد */
   li.loading {
     cursor: default;
     color: #aaa;
@@ -93,11 +156,10 @@
     box-shadow: none;
     font-weight: 400;
     font-size: 1rem;
-    grid-column: 1 / -1; /* يشغل كامل العرض */
+    grid-column: 1 / -1;
     text-align: center;
   }
 
-  /* لودر متحرك */
   li.loading::after {
     content: "";
     width: 28px;
@@ -115,45 +177,163 @@
     to { transform: rotate(360deg); }
   }
 
+  /* ===== وضع الفاتح ===== */
+  body.light-mode {
+    background: #f5f5f5;
+    color: #000;
+  }
+  body.light-mode .topbar {
+    background: #fff;
+    color: #000;
+  }
+  body.light-mode li {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+
+  /* ===== Toast إشعار ===== */
+  #toast {
+    visibility: hidden;
+    min-width: 260px;
+    background: #1e1e1e;
+    color: #ffd700;
+    text-align: center;
+    border-radius: 12px;
+    padding: 14px;
+    position: fixed;
+    z-index: 2000;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+  }
+  #toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
+  }
+  body.light-mode #toast {
+    background: #fff;
+    color: #333;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  /* ✅ زر البروفايل العائم */
+  .profile-float-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: #222;
+    border: 2px solid #ffd700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    transition: 0.3s;
+    z-index: 1200;
+  }
+  .profile-float-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(255,215,0,0.6);
+    background: #ffd700;
+  }
+  .profile-float-btn img {
+    width: 28px;
+    height: 28px;
+  }
+  body.light-mode .profile-float-btn {
+    background: #fff;
+    border: 2px solid #333;
+  }
+  body.light-mode .profile-float-btn:hover {
+    background: #333;
+    border-color: #ffd700;
+  }
+
   @media (max-width: 480px) {
     h1 {
       font-size: 2rem;
       margin-bottom: 30px;
     }
     ul {
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 20px;
+      grid-template-columns: 1fr; /* في الموبايل، عمود واحد للكروت الكبيرة */
+      gap: 30px;
       max-width: 100%;
     }
     .circle {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 14px;
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
     }
     li span {
-      font-size: 1rem;
+      font-size: 1.2rem;
+    }
+    .profile-float-btn {
+      width: 45px;
+      height: 45px;
+      bottom: 15px;
+      left: 15px;
+    }
+    .profile-float-btn img {
+      width: 22px;
+      height: 22px;
     }
   }
 </style>
 </head>
 <body>
-  <h1>المواد الخاصه ب منصه دروسك اون لاين</h1>
+
+  <!-- ✅ الشريط العلوي -->
+  <div class="topbar">
+    <div class="menu-btn">☰</div>
+    <div class="title">مدرسة كنيسة الأمير تادرس</div>
+    <div class="icons">
+      <div class="toggle-dark" id="darkToggle"></div>
+      <!-- واتساب -->
+      <a href="https://whatsapp.com/channel/0029Vb6mJg61SWsuotwwDR0R" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+      </a>
+      <!-- مشاركة -->
+      <img id="shareBtn" src="https://cdn-icons-png.flaticon.com/512/929/929610.png" alt="Share">
+      <!-- إشعارات -->
+      <img id="notifyBtn" src="https://cdn-icons-png.flaticon.com/512/1827/1827272.png" alt="Notification">
+    </div>
+  </div>
+
+  <!-- ✅ Toast -->
+  <div id="toast">الإشعارات هتتفعل قريبًا 🔔✨</div>
+
+  <h1>المواد الخاصة بمدرسة كنيسة الأمير تادرس</h1>
   <ul id="subjects-list">
     <li class="loading">جارٍ التحميل...</li>
   </ul>
+
+  <!-- ✅ زر بروفايل عائم -->
+  <a href="profile.html" class="profile-float-btn">
+    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="بروفايل">
+  </a>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCdhj73cKJc2J2_tDHw2-89EemZx-EGMJQ",
-      authDomain: "alamer-526ff.firebaseapp.com",
-      databaseURL: "https://alamer-526ff-default-rtdb.firebaseio.com",
-      projectId: "alamer-526ff",
-      storageBucket: "alamer-526ff.firebasestorage.app",
-      messagingSenderId: "523879269039",
-      appId: "1:523879269039:web:634861aa34641bfebf8a5a",
+      apiKey: "AIzaSyAdz_OsGPL5xEq-J72FCkuQezVMhU_FATo",
+      authDomain: "website-83e14.firebaseapp.com",
+      databaseURL: "https://website-83e14-default-rtdb.firebaseio.com",
+      projectId: "website-83e14",
+      storageBucket: "website-83e14.firebasestorage.app",
+      messagingSenderId: "994953388464",
+      appId: "1:994953388464:web:9c244de2a4fdcf8561f675",
+      measurementId: "G-7PN256M5PG"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -161,64 +341,94 @@
 
     const subjectsList = document.getElementById('subjects-list');
 
-    // خريطة لصور المواد
     const subjectImages = {
       "أحياء": "https://www2.0zz0.com/2025/09/30/15/923573836.png",
       "فيزياء": "https://www2.0zz0.com/2025/09/30/15/161746092.jpeg",
       "كيمياء": "https://www2.0zz0.com/2025/09/30/15/432614713.png",
       "عربي": "https://www2.0zz0.com/2025/09/30/15/663687320.png",
       "إنجليزي": "https://www2.0zz0.com/2025/09/30/15/572118063.jpeg",
+      "جيولوجيا": "https://www2.0zz0.com/2025/10/01/19/835961815.jpeg",
+      "ادبي": "https://www2.0zz0.com/2025/10/01/19/580067879.jpeg", 
     };
 
-    onValue(
-      ref(db, 'videos'),
-      snapshot => {
-        const data = snapshot.val() || {};
-        const subjects = new Set();
+    onValue(ref(db, 'videos'), snapshot => {
+      const data = snapshot.val() || {};
+      const subjects = new Set();
 
-        Object.values(data).forEach(v => {
-          if (v.subject) subjects.add(v.subject);
-        });
+      Object.values(data).forEach(v => {
+        if (v.subject) subjects.add(v.subject);
+      });
 
-        subjectsList.innerHTML = '';
+      subjectsList.innerHTML = '';
 
-        if (subjects.size === 0) {
-          subjectsList.innerHTML = '<li class="loading">لا توجد مواد.</li>';
-          return;
-        }
-
-        // ترتيب أبجدي
-        [...subjects].sort().forEach(subject => {
-          const li = document.createElement('li');
-
-          // إنشاء الدائرة مع الصورة
-          const circle = document.createElement('div');
-          circle.className = 'circle';
-
-          const img = document.createElement('img');
-          img.src = subjectImages[subject] || 'https://img.icons8.com/ios-filled/100/ffd700/book.png';
-          img.alt = subject;
-          circle.appendChild(img);
-
-          // اسم المادة
-          const span = document.createElement('span');
-          span.textContent = subject;
-
-          li.appendChild(circle);
-          li.appendChild(span);
-
-          li.onclick = () => {
-            window.location.href = `teachers.html?subject=${encodeURIComponent(subject)}`;
-          };
-
-          subjectsList.appendChild(li);
-        });
-      },
-      error => {
-        subjectsList.innerHTML = '<li class="loading">⚠️ خطأ في تحميل البيانات</li>';
-        console.error(error);
+      if (subjects.size === 0) {
+        subjectsList.innerHTML = '<li class="loading">لا توجد مواد.</li>';
+        return;
       }
-    );
+
+      [...subjects].sort().forEach(subject => {
+        const li = document.createElement('li');
+        const circle = document.createElement('div');
+        circle.className = 'circle';
+
+        const img = document.createElement('img');
+        img.src = subjectImages[subject] || 'https://img.icons8.com/ios-filled/100/ffd700/book.png';
+        img.alt = subject;
+        circle.appendChild(img);
+
+        const span = document.createElement('span');
+        span.textContent = subject;
+
+        li.appendChild(circle);
+        li.appendChild(span);
+
+        li.onclick = () => {
+          window.location.href = `teachers.html?subject=${encodeURIComponent(subject)}`;
+        };
+
+        subjectsList.appendChild(li);
+      });
+    }, error => {
+      subjectsList.innerHTML = '<li class="loading">⚠️ خطأ في تحميل البيانات</li>';
+      console.error(error);
+    });
+
+    // ✅ دالة Toast
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.className = "show";
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
+    // ✅ زر الوضع الليلي والفاتح
+    const toggle = document.getElementById("darkToggle");
+    toggle.addEventListener("click", () => {
+      toggle.classList.toggle("active");
+      document.body.classList.toggle("light-mode");
+    });
+
+    // ✅ زر المشاركة
+    document.getElementById("shareBtn").addEventListener("click", async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "مدرسة كنيسة الأمير تادرس",
+            text: "جرب منصة مدرسة كنيسة الأمير تادرس 📚✨",
+            url: window.location.href
+          });
+        } catch (err) {
+          showToast("❌ تم إلغاء المشاركة");
+        }
+      } else {
+        showToast("المشاركة غير مدعومة في متصفحك 😢");
+      }
+    });
+
+    // ✅ زر الإشعارات → Toast
+    document.getElementById("notifyBtn").addEventListener("click", () => {
+      showToast("الإشعارات هتتفعل قريبًا 🔔✨");
+    });
   </script>
 </body>
-</html
+</html>
