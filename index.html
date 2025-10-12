@@ -458,7 +458,7 @@
 
 <div id="toast" class="toast" role="alert"></div>
 
-      <script>
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyCdhj73cKJc2J2_tDHw2-89EemZx-EGMJQ",
     authDomain: "alamer-526ff.firebaseapp.com",
@@ -488,13 +488,6 @@
 
   let currentUid = localStorage.getItem("localUid") || null;
   let pendingRequestData = null;
-
-  // 🎵 أصوات الإشعارات
-  const approvalSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_25e4d515e1.mp3?filename=correct-2-46134.mp3");
-  approvalSound.volume = 0.7;
-
-  const rejectSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_9226d3bdbb.mp3?filename=error-126627.mp3");
-  rejectSound.volume = 0.7;
 
   function validateInputs() {
     const name = studentNameInput.value.trim();
@@ -535,45 +528,6 @@
     registrationForm.style.display = 'block';
   }
 
-  // 🔔 الاستماع للموافقة أثناء الانتظار
-  function listenForApprovalWhileWaiting() {
-    if (!currentUid) return;
-    db.ref("approvedStudents").orderByChild("deviceId").equalTo(currentUid).on("value", snap => {
-      if (snap.exists() && localStorage.getItem("approved") !== "true") {
-        const key = Object.keys(snap.val())[0];
-        const data = snap.val()[key];
-
-        approvalSound.play();
-        showToast("🎉 تم قبول طلبك! سيتم تحويلك الآن", "success");
-
-        localStorage.setItem("approved", "true");
-        localStorage.setItem("studentName", data.name || "");
-        localStorage.setItem("studentPhone", data.phone || "");
-
-        setTimeout(() => {
-          window.location.href = "subjects.html";
-        }, 2000);
-      }
-    });
-  }
-
-  // 🚨 مراقبة الرفض أو الحذف
-  function listenForRejection() {
-    if (!currentUid) return;
-    db.ref("pendingStudents").on("value", snap => {
-      const data = snap.val() || {};
-      const stillExists = Object.values(data).some(item => item.deviceId === currentUid);
-      if (!stillExists && !localStorage.getItem("approved")) {
-        rejectSound.play();
-        showToast("❌ تم رفض طلبك أو حذفه من الانتظار", "error");
-        setTimeout(() => {
-          localStorage.clear();
-          window.location.href = "index.html";
-        }, 2500);
-      }
-    });
-  }
-
   function initAuth() {
     statusIndicator.style.display = 'flex';
     updateButtonText('جاري التحضير...', true);
@@ -588,8 +542,7 @@
           submitBtn.disabled = false;
           checkIfApproved();
           checkExistingRequest();
-          listenForApprovalWhileWaiting();
-          listenForRejection();
+          listenForDeletion();
         } else {
           throw new Error("لم يتم الحصول على UID.");
         }
@@ -607,10 +560,19 @@
     db.ref("approvedStudents").orderByChild("deviceId").equalTo(currentUid).once("value")
       .then(snap => {
         if (snap.exists()) {
-          const data = Object.values(snap.val())[0];
+          const key = Object.keys(snap.val())[0];
+          const data = snap.val()[key];
+
+          if (data.expiry && Date.now() > data.expiry) {
+            showToast("انتهت صلاحية الكود، يرجى إعادة التسجيل", "error");
+            localStorage.removeItem("approved");
+            return;
+          }
+
+          if (data.name) localStorage.setItem("studentName", data.name);
+          if (data.phone) localStorage.setItem("studentPhone", data.phone);
+
           localStorage.setItem("approved", "true");
-          localStorage.setItem("studentName", data.name || "");
-          localStorage.setItem("studentPhone", data.phone || "");
           window.location.href = "subjects.html";
         } else {
           localStorage.removeItem("approved");
@@ -625,16 +587,48 @@
         if (snap.exists()) {
           const requestData = snap.val();
           pendingRequestData = requestData;
+          
+          // إظهار شاشة الانتظار وإخفاء النموذج
           showWaitingScreen(requestData);
-          showToast("⏳ طلبك قيد المراجعة", "warning");
+          showToast("لديك طلب معلق قيد المراجعة", "warning");
+          
         } else {
           showRegistrationForm();
+          deleteBtn.style.display = "none";
         }
       })
       .catch(err => {
         console.error("Error checking existing request:", err);
         showRegistrationForm();
       });
+  }
+
+  function listenForDeletion() {
+    if (!currentUid) return;
+    db.ref("approvedStudents").orderByChild("deviceId").equalTo(currentUid).on("value", snap => {
+      if (snap.exists()) {
+        const key = Object.keys(snap.val())[0];
+        const data = snap.val()[key];
+
+        if (data.expiry && Date.now() > data.expiry) {
+          showToast("انتهت صلاحية الكود، يرجى إعادة التسجيل", "error");
+          localStorage.removeItem("approved");
+          setTimeout(() => { location.reload(); }, 1500);
+          return;
+        }
+
+        if (data.name) localStorage.setItem("studentName", data.name);
+        if (data.phone) localStorage.setItem("studentPhone", data.phone);
+
+        localStorage.setItem("approved", "true");
+      } else {
+        if (localStorage.getItem("approved") === "true") {
+          localStorage.removeItem("approved");
+          showToast("تم حذفك من النظام، يرجى إعادة التسجيل", "error");
+          setTimeout(() => { location.reload(); }, 1500);
+        }
+      }
+    });
   }
 
   studentNameInput.addEventListener("input", validateInputs);
@@ -666,16 +660,38 @@
     db.ref("approvedStudents").orderByChild("phone").equalTo(phone).once("value")
       .then(snap2 => {
         if (snap2.exists()) {
-          showToast("تمت الموافقة مسبقاً على هذا الرقم", "success");
-          localStorage.setItem("approved", "true");
-          setTimeout(() => { window.location.href = "subjects.html"; }, 1000);
+          const approvedKey = Object.keys(snap2.val())[0];
+          const approvedData = snap2.val()[approvedKey];
+
+          if (approvedData.deviceId && approvedData.deviceId !== currentUid) {
+            showToast("هذا الحساب مسجل من جهاز آخر", "error");
+            updateButtonText('ارسال الطلب', false);
+            return;
+          }
+
+          if (!approvedData.deviceId) {
+            db.ref("approvedStudents/"+approvedKey).update({ deviceId: currentUid });
+          }
+
+          if (approvedData.expiry && Date.now() > approvedData.expiry) {
+            showToast("انتهت صلاحية الكود، يرجى إعادة التسجيل", "error");
+            updateButtonText('ارسال الطلب', false);
+            return;
+          }
+
+          showToast("تم الموافقة مسبقاً على هذا الرقم", "success");
+          localStorage.setItem("approved","true");
+          setTimeout(() => { window.location.href="subjects.html"; }, 1000);
         } else {
-          db.ref("pendingStudents/" + currentUid).set({
+          db.ref("pendingStudents/"+currentUid).set({
             name, phone, deviceId: currentUid, timestamp: Date.now()
           }).then(() => {
             showToast("تم إرسال طلبك، انتظر الموافقة", "success");
-            showWaitingScreen({ name, phone });
             updateButtonText('ارسال الطلب', false);
+            
+            // إظهار شاشة الانتظار بعد الإرسال الناجح
+            showWaitingScreen({ name, phone });
+            
           }).catch(err => {
             showToast("حدث خطأ أثناء الإرسال", "error");
             updateButtonText('ارسال الطلب', false);
@@ -690,9 +706,23 @@
       });
   });
 
+  deleteBtn.addEventListener("click", () => {
+    if (!currentUid) return;
+    db.ref("pendingStudents/"+currentUid).remove()
+      .then(() => {
+        showToast("تم حذف الطلب بنجاح", "success");
+        deleteBtn.style.display = "none";
+        showRegistrationForm();
+      })
+      .catch(err => {
+        showToast("حدث خطأ أثناء الحذف", "error");
+        console.error(err);
+      });
+  });
+
   cancelRequestBtn.addEventListener("click", () => {
     if (!currentUid) return;
-    db.ref("pendingStudents/" + currentUid).remove()
+    db.ref("pendingStudents/"+currentUid).remove()
       .then(() => {
         showToast("تم إلغاء الطلب بنجاح", "success");
         showRegistrationForm();
@@ -704,6 +734,6 @@
   });
 
   initAuth();
-    </script>
+</script>
 </body>
   </html>
