@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>المواد - مدرسة كنيسة الأمير تادرس</title>
+<title>المواد - منصة THE BEST</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
 
@@ -95,14 +95,14 @@
     max-width: 900px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* نظام مربعات 2x2 لأربع مواد كبيرة */
-    gap: 40px; /* زيادة المسافة لجعلها أكبر */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 30px;
   }
 
   li {
     background: #1e1e1e;
     border-radius: 16px;
-    padding: 30px 20px 40px; /* زيادة الحشوة لجعل الكروت أكبر */
+    padding: 20px 15px 30px;
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(255, 215, 0, 0.15);
     transition: background-color 0.3s ease, transform 0.25s ease, box-shadow 0.3s ease;
@@ -125,12 +125,12 @@
   }
 
   .circle {
-    width: 140px; /* زيادة الحجم لجعل الكروت كبيرة */
-    height: 140px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     background: #333;
     overflow: hidden;
-    margin-bottom: 25px; /* زيادة المسافة السفلية */
+    margin-bottom: 18px;
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
     display: flex;
     justify-content: center;
@@ -145,7 +145,7 @@
 
   li span {
     font-weight: 700;
-    font-size: 1.4rem; /* زيادة حجم النص */
+    font-size: 1.2rem;
     text-align: center;
   }
 
@@ -264,17 +264,17 @@
       margin-bottom: 30px;
     }
     ul {
-      grid-template-columns: 1fr; /* في الموبايل، عمود واحد للكروت الكبيرة */
-      gap: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 20px;
       max-width: 100%;
     }
     .circle {
-      width: 120px;
-      height: 120px;
-      margin-bottom: 20px;
+      width: 80px;
+      height: 80px;
+      margin-bottom: 14px;
     }
     li span {
-      font-size: 1.2rem;
+      font-size: 1rem;
     }
     .profile-float-btn {
       width: 45px;
@@ -294,7 +294,7 @@
   <!-- ✅ الشريط العلوي -->
   <div class="topbar">
     <div class="menu-btn">☰</div>
-    <div class="title">مدرسة كنيسة الأمير تادرس</div>
+    <div class="title">دروسك اون لاين 2026</div>
     <div class="icons">
       <div class="toggle-dark" id="darkToggle"></div>
       <!-- واتساب -->
@@ -311,126 +311,102 @@
   <!-- ✅ Toast -->
   <div id="toast">الإشعارات هتتفعل قريبًا 🔔✨</div>
 
-  <h1>مواد مدرسة كنيسة الأمير تادرس</h1>
-  <ul id="subjects-list">
-    <li class="loading">جارٍ التحميل...</li>
-  </ul>
+  <h1>المواد الخاصة بمنصة دروسك أون لاين</h1>
+<ul id="subjects-list">
+  <li class="loading">جارٍ التحميل...</li>
+</ul>
 
-  <!-- ✅ زر بروفايل عائم -->
-  <a href="profile.html" class="profile-float-btn">
-    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="بروفايل">
-  </a>
-  
-<script src="authCheck.js"></script>
-  
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
+<script>
+// تفعيل التقدم من الـ localStorage عند التحميل
+document.addEventListener("authReady", () => {
+  const firebaseConfig = {
+    apiKey: "AIzaSyCdhj73cKJc2J2_tDHw2-89EemZx-EGMJQ",
+    authDomain: "alamer-526ff.firebaseapp.com",
+    databaseURL: "https://alamer-526ff-default-rtdb.firebaseio.com",
+    projectId: "alamer-526ff",
+    storageBucket: "alamer-526ff.firebasestorage.app",
+    messagingSenderId: "523879269039",
+    appId: "1:523879269039:web:634861aa34641bfebf8a5a",
+  };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAdz_OsGPL5xEq-J72FCkuQezVMhU_FATo",
-      authDomain: "website-83e14.firebaseapp.com",
-      databaseURL: "https://website-83e14-default-rtdb.firebaseio.com",
-      projectId: "website-83e14",
-      storageBucket: "website-83e14.firebasestorage.app",
-      messagingSenderId: "994953388464",
-      appId: "1:994953388464:web:9c244de2a4fdcf8561f675",
-      measurementId: "G-7PN256M5PG"
-    };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const subjectsList = document.getElementById('subjects-list');
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  const subjectImages = {
+    "أحياء": "https://www2.0zz0.com/2025/09/30/15/923573836.png",
+    "فيزياء": "https://www2.0zz0.com/2025/09/30/15/161746092.jpeg",
+    "كيمياء": "https://www2.0zz0.com/2025/09/30/15/432614713.png",
+    "عربي": "https://www2.0zz0.com/2025/09/30/15/663687320.png",
+    "إنجليزي": "https://www2.0zz0.com/2025/09/30/15/572118063.jpeg",
+    "جيولوجيا": "https://www2.0zz0.com/2025/10/01/19/835961815.jpeg",
+    "رياضه": "https://www2.0zz0.com/2025/10/05/19/620468277.jpeg",
+    "ادبي": "https://www2.0zz0.com/2025/10/01/19/580067879.jpeg",
+  };
 
-    const subjectsList = document.getElementById('subjects-list');
+  onValue(ref(db, 'videos'), snapshot => {
+    const data = snapshot.val() || {};
+    const subjects = new Set();
 
-    const subjectImages = {
-      "أحياء": "https://www2.0zz0.com/2025/09/30/15/923573836.png",
-      "فيزياء": "https://www2.0zz0.com/2025/09/30/15/161746092.jpeg",
-      "كيمياء": "https://www2.0zz0.com/2025/09/30/15/432614713.png",
-      "عربي": "https://www2.0zz0.com/2025/09/30/15/663687320.png",
-      "إنجليزي": "https://www2.0zz0.com/2025/09/30/15/572118063.jpeg",
-      "جيولوجيا": "https://www2.0zz0.com/2025/10/01/19/835961815.jpeg",
-      "ادبي": "https://www2.0zz0.com/2025/10/01/19/580067879.jpeg", 
-    };
+    Object.values(data).forEach(v => { if (v.subject) subjects.add(v.subject); });
 
-    onValue(ref(db, 'videos'), snapshot => {
-      const data = snapshot.val() || {};
-      const subjects = new Set();
+    subjectsList.innerHTML = '';
 
-      Object.values(data).forEach(v => {
-        if (v.subject) subjects.add(v.subject);
-      });
-
-      subjectsList.innerHTML = '';
-
-      if (subjects.size === 0) {
-        subjectsList.innerHTML = '<li class="loading">لا توجد مواد.</li>';
-        return;
-      }
-
-      [...subjects].sort().forEach(subject => {
-        const li = document.createElement('li');
-        const circle = document.createElement('div');
-        circle.className = 'circle';
-
-        const img = document.createElement('img');
-        img.src = subjectImages[subject] || 'https://img.icons8.com/ios-filled/100/ffd700/book.png';
-        img.alt = subject;
-        circle.appendChild(img);
-
-        const span = document.createElement('span');
-        span.textContent = subject;
-
-        li.appendChild(circle);
-        li.appendChild(span);
-
-        li.onclick = () => {
-          window.location.href = `teachers.html?subject=${encodeURIComponent(subject)}`;
-        };
-
-        subjectsList.appendChild(li);
-      });
-    }, error => {
-      subjectsList.innerHTML = '<li class="loading">⚠️ خطأ في تحميل البيانات</li>';
-      console.error(error);
-    });
-
-    // ✅ دالة Toast
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.textContent = msg;
-      toast.className = "show";
-      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    if (subjects.size === 0) {
+      subjectsList.innerHTML = '<li class="loading">⚠️ لا توجد مواد.</li>';
+      return;
     }
 
-    // ✅ زر الوضع الليلي والفاتح
-    const toggle = document.getElementById("darkToggle");
-    toggle.addEventListener("click", () => {
-      toggle.classList.toggle("active");
-      document.body.classList.toggle("light-mode");
+    [...subjects].sort().forEach(subject => {
+      const li = document.createElement('li');
+      const circle = document.createElement('div');
+      circle.className = 'circle';
+
+      const img = document.createElement('img');
+      img.src = subjectImages[subject] || 'https://img.icons8.com/ios-filled/100/ffd700/book.png';
+      img.alt = subject;
+      circle.appendChild(img);
+
+      const span = document.createElement('span');
+      span.textContent = subject;
+
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      const progress = localStorage.getItem(`progress-${subject}`) || 0;
+      progressBar.style.width = `${progress}%`;
+      progressBar.textContent = `${progress}%`;
+
+      li.appendChild(circle);
+      li.appendChild(span);
+      li.appendChild(progressBar);
+
+      li.onclick = () => {
+        // عند الضغط على المادة، نحدث التقدم في الـ localStorage
+        const currentProgress = localStorage.getItem(`progress-${subject}`) || 0;
+        const newProgress = Math.min(100, parseInt(currentProgress) + 10); // زيادة التقدم 10% على كل مرة
+        localStorage.setItem(`progress-${subject}`, newProgress);
+        progressBar.style.width = `${newProgress}%`;
+        progressBar.textContent = `${newProgress}%`;
+      };
+
+      subjectsList.appendChild(li);
     });
 
-    // ✅ زر المشاركة
-    document.getElementById("shareBtn").addEventListener("click", async () => {
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: "مدرسة كنيسة الأمير تادرس",
-            text: "جرب منصة مدرسة كنيسة الأمير تادرس 📚✨",
-            url: window.location.href
-          });
-        } catch (err) {
-          showToast("❌ تم إلغاء المشاركة");
-        }
-      } else {
-        showToast("المشاركة غير مدعومة في متصفحك 😢");
-      }
-    });
+    showToast("✅ تم تحميل المواد بنجاح", "success");
+  }, error => {
+    console.error(error);
+    subjectsList.innerHTML = '<li class="loading">⚠️ خطأ في تحميل البيانات</li>';
+    showToast("❌ فشل الاتصال بـ Firebase", "error");
+  });
 
-    // ✅ زر الإشعارات → Toast
-    document.getElementById("notifyBtn").addEventListener("click", () => {
-      showToast("الإشعارات هتتفعل قريبًا 🔔✨");
-    });
-  </script>
+  // Function to show toast notification
+  function showToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.className = "show";
+    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+  }
+});
+</script>
 </body>
 </html>
